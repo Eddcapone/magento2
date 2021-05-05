@@ -61,6 +61,14 @@ define([
                 $(self.options.targetElement).dropdownDialog('close');
             };
             events['click ' + this.options.button.checkout] = $.proxy(function () {
+                let test = customerData.get('customer')();	
+
+                // Check if object needs initialisation
+				if ($.isEmptyObject(test)) {
+                    console.log("init!");
+				    customerData.init();
+				}
+                
                 var cart = customerData.get('cart'),
                     customer = customerData.get('customer'),
                     element = $(this.options.button.checkout);
