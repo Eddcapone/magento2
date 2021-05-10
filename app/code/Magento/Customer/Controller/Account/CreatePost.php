@@ -261,7 +261,7 @@ class CreatePost extends AbstractAccount implements CsrfAwareActionInterface, Ht
      */
     protected function extractAddress()
     {
-        if (!$this->getRequest()->getPost('create_address')) {
+        if (!$this->_request->getPost('create_address')) {
             return null;
         }
 
@@ -271,13 +271,13 @@ class CreatePost extends AbstractAccount implements CsrfAwareActionInterface, Ht
         $addressData = [];
 
         $regionDataObject = $this->regionDataFactory->create();
-        $userDefinedAttr = $this->getRequest()->getParam('address') ?: [];
+        $userDefinedAttr = $this->_request->getParam('address') ?: [];
         foreach ($allowedAttributes as $attribute) {
             $attributeCode = $attribute->getAttributeCode();
             if ($attribute->isUserDefined()) {
                 $value = array_key_exists($attributeCode, $userDefinedAttr) ? $userDefinedAttr[$attributeCode] : null;
             } else {
-                $value = $this->getRequest()->getParam($attributeCode);
+                $value = $this->_request->getParam($attributeCode);
             }
 
             if ($value === null) {
@@ -306,9 +306,9 @@ class CreatePost extends AbstractAccount implements CsrfAwareActionInterface, Ht
         $addressDataObject->setRegion($regionDataObject);
 
         $addressDataObject->setIsDefaultBilling(
-            $this->getRequest()->getParam('default_billing', false)
+            $this->_request->getParam('default_billing', false)
         )->setIsDefaultShipping(
-            $this->getRequest()->getParam('default_shipping', false)
+            $this->_request->getParam('default_shipping', false)
         );
         return $addressDataObject;
     }
@@ -354,8 +354,8 @@ class CreatePost extends AbstractAccount implements CsrfAwareActionInterface, Ht
             return $resultRedirect;
         }
 
-        if (!$this->getRequest()->isPost()
-            || !$this->formKeyValidator->validate($this->getRequest())
+        if (!$this->_request->isPost()
+            || !$this->formKeyValidator->validate($this->_request)
         ) {
             $url = $this->urlModel->getUrl('*/*/create', ['_secure' => true]);
             return $this->resultRedirectFactory->create()
@@ -367,13 +367,13 @@ class CreatePost extends AbstractAccount implements CsrfAwareActionInterface, Ht
             $addresses = $address === null ? [] : [$address];
             $customer = $this->customerExtractor->extract('customer_account_create', $this->_request);
             $customer->setAddresses($addresses);
-            $password = $this->getRequest()->getParam('password');
-            $confirmation = $this->getRequest()->getParam('password_confirmation');
+            $password = $this->_request->getParam('password');
+            $confirmation = $this->_request->getParam('password_confirmation');
             $redirectUrl = $this->session->getBeforeAuthUrl();
             $this->checkPasswordConfirmation($password, $confirmation);
 
             $extensionAttributes = $customer->getExtensionAttributes();
-            $extensionAttributes->setIsSubscribed($this->getRequest()->getParam('is_subscribed', false));
+            $extensionAttributes->setIsSubscribed($this->_request->getParam('is_subscribed', false));
             $customer->setExtensionAttributes($extensionAttributes);
 
             $customer = $this->accountManagement
@@ -429,7 +429,7 @@ class CreatePost extends AbstractAccount implements CsrfAwareActionInterface, Ht
             $this->messageManager->addExceptionMessage($e, __('We can\'t save the customer.'));
         }
 
-        $this->session->setCustomerFormData($this->getRequest()->getPostValue());
+        $this->session->setCustomerFormData($this->_request->getPostValue());
         $defaultUrl = $this->urlModel->getUrl('*/*/create', ['_secure' => true]);
         return $resultRedirect->setUrl($this->_redirect->error($defaultUrl));
     }
